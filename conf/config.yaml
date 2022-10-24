@@ -1,0 +1,10 @@
+# conf/config.yaml
+
+mysql:
+  localhost: 110.40.212.154
+  port: 3306
+  user: dragonfly
+  password: dragonfly
+  database: dragonfly
+
+port: 9090
