@@ -17,7 +17,6 @@ import (
 var _ Dir = (*dir)(nil)
 
 type Dir interface {
-	IsFile(filename string) bool
 	IsPath(path string) (bool, error)
 	Create(filePath string) error
 	Write(filename string, data []byte, perm os.FileMode) error
@@ -29,15 +28,6 @@ type dir struct {
 
 func NewDir() Dir {
 	return &dir{}
-}
-
-func (con *dir) IsFile(filename string) bool {
-	_, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return true
-
 }
 
 func (con *dir) IsPath(path string) (bool, error) {
@@ -52,7 +42,7 @@ func (con *dir) IsPath(path string) (bool, error) {
 }
 
 func (con *dir) Create(filePath string) error {
-	if !con.IsFile(filePath) {
+	if ok, _ := con.IsPath(filePath); !ok {
 		err := os.MkdirAll(filePath, os.ModePerm)
 		if err != nil {
 			return err
