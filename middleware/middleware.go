@@ -6,7 +6,7 @@ import (
 
 func Instance(r *gin.Engine) *gin.Engine {
 	r.Use(Cors())
-	//r.Use(Header())
+	r.Use(Filter())
 	//r.Use(Pretreatment())
 	return r
 }
