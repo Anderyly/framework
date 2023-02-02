@@ -10,9 +10,10 @@ package lib
 import (
 	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"framework/ay"
-	"log"
+	"io"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -24,7 +25,7 @@ var _ Str = (*str)(nil)
 
 type Str interface {
 	LastTime(t int64) string
-	MD5(str string) string
+	Md5(str string) string
 	AuthCode(str, operation, key string, expiry int64) string
 	MakeCoupon(coupon string) float64
 	Summary(content string, count int) string
@@ -43,22 +44,20 @@ func (con *str) LastTime(t int64) (msg string) {
 	switch {
 	case s < 60:
 		msg = strconv.Itoa(s) + "分钟前"
-
 	case s >= 60 && s < (60*24):
 		msg = strconv.Itoa(s/60) + "小时前"
 	case s >= (60*24) && s < (60*24*3):
 		msg = strconv.Itoa(s/24/60) + "天前"
 	default:
-		msg = time.Unix(int64(t), 0).Format("2006-01-02 15:04:05")
+		msg = time.Unix(t, 0).Format("2006-01-02 15:04:05")
 	}
 	return
 }
 
-func (con *str) MD5(str string) string {
-	data := []byte(str)
-	has := md5.Sum(data)
-	md5str := fmt.Sprintf("%x", has)
-	return md5str
+func (con *str) Md5(str string) string {
+	Md5 := md5.New()
+	_, _ = io.WriteString(Md5, str)
+	return hex.EncodeToString(Md5.Sum(nil))
 }
 
 func (con *str) AuthCode(str, operation, key string, expiry int64) string {
@@ -73,19 +72,19 @@ func (con *str) AuthCode(str, operation, key string, expiry int64) string {
 	if key == "" {
 		key = ay.Yaml.GetString("key")
 	}
-	key = con.MD5(key)
+	key = con.Md5(key)
 
-	keyA := con.MD5(key[:16])
-	keyB := con.MD5(key[16:])
+	keyA := con.Md5(key[:16])
+	keyB := con.Md5(key[16:])
 	keyC := ""
 	if operation == "DECODE" {
 		keyC = str[:cKeyLength]
 	} else {
-		sTime := con.MD5(time.Now().String())
+		sTime := con.Md5(time.Now().String())
 		sLen := 32 - cKeyLength
 		keyC = sTime[sLen:]
 	}
-	cryptKey := fmt.Sprintf("%s%s", keyA, con.MD5(keyA+keyC))
+	cryptKey := fmt.Sprintf("%s%s", keyA, con.Md5(keyA+keyC))
 	keyLength := len(cryptKey)
 	if operation == "DECODE" {
 		str = strings.Replace(str, "-", "+", -1)
@@ -99,7 +98,7 @@ func (con *str) AuthCode(str, operation, key string, expiry int64) string {
 		if expiry != 0 {
 			expiry = expiry + time.Now().Unix()
 		}
-		tmpMd5 := con.MD5(str + keyB)
+		tmpMd5 := con.Md5(str + keyB)
 		str = fmt.Sprintf("%010d%s%s", expiry, tmpMd5[:16], str)
 	}
 	stringLength := len(str)
@@ -136,7 +135,7 @@ func (con *str) AuthCode(str, operation, key string, expiry int64) string {
 		if _err != nil {
 			return ""
 		}
-		if (frontTen == 0 || frontTen-time.Now().Unix() > 0) && result[10:26] == con.MD5(result[26:] + keyB)[:16] {
+		if (frontTen == 0 || frontTen-time.Now().Unix() > 0) && result[10:26] == con.Md5(result[26:] + keyB)[:16] {
 			return result[26:]
 		} else {
 			return ""
@@ -153,8 +152,6 @@ func (con *str) AuthCode(str, operation, key string, expiry int64) string {
 func (con *str) MakeCoupon(coupon string) float64 {
 
 	couponArr := strings.Split(coupon, "-")
-
-	log.Println(couponArr)
 
 	maxPrice, err := strconv.ParseFloat(couponArr[1], 64)
 	if err != nil {
