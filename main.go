@@ -32,12 +32,12 @@ func main() {
 	c.Start()
 
 	// 加载gin
-	r = gin.Default()
 	gin.SetMode(gin.DebugMode)
-	r = middleware.Instance(r)
+	r = gin.Default()
+	middleware.Instance(r)
 	r.StaticFS("/static/", http.Dir("./static"))
 	r.StaticFS("/root", http.Dir("./admin"))
-	r = routers.Instance(r)
+	routers.Instance(r)
 	err = r.Run(":" + ay.Yaml.GetString("port"))
 
 	if err != nil {
