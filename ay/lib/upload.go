@@ -69,17 +69,17 @@ func (con *upload) Get(file *multipart.FileHeader) (int, string) {
 	}
 
 	fileName := NewStr().Md5(fmt.Sprintf("%s%s", file.Filename, time.Now().String()))
-	fildDir := fmt.Sprintf("static/upload/%d-%d/", time.Now().Year(), time.Now().Month())
+	fileDir := fmt.Sprintf("static/upload/%d-%d/", time.Now().Year(), time.Now().Month())
 	if con.Address != "" {
-		fildDir = fmt.Sprintf(con.Address, time.Now().Year(), time.Now().Month())
+		fileDir = fmt.Sprintf(con.Address, time.Now().Year(), time.Now().Month())
 	}
 
-	err := NewDir().Create(fildDir)
+	err := NewDir().Create(fileDir)
 	if err != nil {
 		return 400, err.Error()
 	}
 
-	filePath, err := os.Create(fildDir + fileName + fileExt)
+	filePath, err := os.Create(fileDir + fileName + fileExt)
 	if err != nil {
 		return 400, err.Error()
 	}
@@ -98,7 +98,7 @@ func (con *upload) Get(file *multipart.FileHeader) (int, string) {
 		filePath.Write(context[:n])
 		if err != nil {
 			if err == io.EOF {
-				return 200, fildDir + fileName + fileExt
+				return 200, fileDir + fileName + fileExt
 			} else {
 				return 400, err.Error()
 			}
