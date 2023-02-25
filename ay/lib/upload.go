@@ -70,6 +70,9 @@ func (con *upload) Get(file *multipart.FileHeader) (int, string) {
 
 	fileName := NewStr().Md5(fmt.Sprintf("%s%s", file.Filename, time.Now().String()))
 	fildDir := fmt.Sprintf("static/upload/%d-%d/", time.Now().Year(), time.Now().Month())
+	if con.Address != "" {
+		fildDir = fmt.Sprintf(con.Address, time.Now().Year(), time.Now().Month())
+	}
 
 	err := NewDir().Create(fildDir)
 	if err != nil {
