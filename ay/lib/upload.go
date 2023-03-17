@@ -11,7 +11,6 @@ package lib
 import (
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"os"
 	"path"
@@ -22,37 +21,30 @@ import (
 var _ Upload = (*upload)(nil)
 
 type Upload interface {
-	Ext(value []string) Upload
 	Get(file *multipart.FileHeader) (int, string)
-	Path(value string) Upload
+	Set(path string, ext []string, size int64) Upload
 }
 
 type upload struct {
 	Suffix  []string
 	Address string
+	Size    int64
 }
 
 func NewUpload() Upload {
 	return &upload{}
 }
 
-func (con *upload) Ext(value []string) Upload {
+func (con *upload) Set(path string, ext []string, size int64) Upload {
 	return &upload{
-		Suffix:  value,
-		Address: con.Address,
-	}
-}
-
-func (con *upload) Path(value string) Upload {
-	return &upload{
-		Suffix:  con.Suffix,
-		Address: value,
+		Suffix:  ext,
+		Address: path,
+		Size:    size,
 	}
 }
 
 func (con *upload) Get(file *multipart.FileHeader) (int, string) {
 
-	log.Println(con)
 	fileExt := strings.ToLower(path.Ext(file.Filename))
 
 	suffix := ""
@@ -66,6 +58,10 @@ func (con *upload) Get(file *multipart.FileHeader) (int, string) {
 
 	if !isExt {
 		return 400, "上传失败!只允许" + suffix + "文件"
+	}
+
+	if file.Size > con.Size {
+		return 400, "上传文件过大"
 	}
 
 	fileName := NewStr().Md5(fmt.Sprintf("%s%s", file.Filename, time.Now().String()))
