@@ -2,18 +2,18 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-func Instance(r *gin.Engine) *gin.Engine {
+func Instance(r *gin.Engine) {
 
-	r = ApiRouter(r)
+	ApiRouter(r)
 
 	r.NoRoute(func(c *gin.Context) {
-		c.JSON(404, gin.H{
-			"code": 404,
+		c.JSON(http.StatusOK, gin.H{
+			"code": http.StatusNotFound,
 			"msg":  "访问错误",
 		})
 	})
 
-	return r
 }
