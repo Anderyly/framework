@@ -21,7 +21,7 @@ import (
 var _ Upload = (*upload)(nil)
 
 type Upload interface {
-	Get(file *multipart.FileHeader) (int, string)
+	Get(file *multipart.FileHeader) (bool, string)
 	Set(path string, ext []string, size int64) Upload
 }
 
@@ -43,7 +43,7 @@ func (con *upload) Set(path string, ext []string, size int64) Upload {
 	}
 }
 
-func (con *upload) Get(file *multipart.FileHeader) (int, string) {
+func (con *upload) Get(file *multipart.FileHeader) (bool, string) {
 
 	fileExt := strings.ToLower(path.Ext(file.Filename))
 
@@ -57,11 +57,11 @@ func (con *upload) Get(file *multipart.FileHeader) (int, string) {
 	}
 
 	if !isExt {
-		return 400, "上传失败!只允许" + suffix + "文件"
+		return false, "上传失败!只允许" + suffix + "文件"
 	}
 
 	if file.Size > con.Size {
-		return 400, "上传文件过大"
+		return false, "上传文件过大"
 	}
 
 	fileName := NewStr().Md5(fmt.Sprintf("%s%s", file.Filename, time.Now().String()))
@@ -72,17 +72,17 @@ func (con *upload) Get(file *multipart.FileHeader) (int, string) {
 
 	err := NewDir().Create(fileDir)
 	if err != nil {
-		return 400, err.Error()
+		return false, err.Error()
 	}
 
 	filePath, err := os.Create(fileDir + fileName + fileExt)
 	if err != nil {
-		return 400, err.Error()
+		return false, err.Error()
 	}
 
 	data, err := file.Open()
 	if err != nil {
-		return 400, err.Error()
+		return false, err.Error()
 	}
 
 	defer data.Close()
@@ -94,9 +94,9 @@ func (con *upload) Get(file *multipart.FileHeader) (int, string) {
 		filePath.Write(context[:n])
 		if err != nil {
 			if err == io.EOF {
-				return 200, fileDir + fileName + fileExt
+				return false, fileDir + fileName + fileExt
 			} else {
-				return 400, err.Error()
+				return false, err.Error()
 			}
 		}
 	}

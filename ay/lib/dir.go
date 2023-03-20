@@ -9,7 +9,6 @@
 package lib
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 )
@@ -17,10 +16,9 @@ import (
 var _ Dir = (*dir)(nil)
 
 type Dir interface {
-	IsPath(path string) (bool, error)
-	Create(filePath string) error
-	Write(filename string, data []byte, perm os.FileMode) error
-	Get(localDir string) int
+	IsPath(path string) (bool, error) // 判断路径是否存在
+	Create(filePath string) error     // 创建文件夹 注意 linux系统/为根目录
+	Get(localDir string) int          // 获取文件夹下文件数量
 }
 
 type dir struct {
@@ -50,21 +48,6 @@ func (con *dir) Create(filePath string) error {
 		return err
 	}
 	return nil
-}
-
-func (con *dir) Write(filename string, data []byte, perm os.FileMode) error {
-	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, perm)
-	if err != nil {
-		return err
-	}
-	n, err := f.Write(data)
-	if err == nil && n < len(data) {
-		err = io.ErrShortWrite
-	}
-	if err1 := f.Close(); err == nil {
-		err = err1
-	}
-	return err
 }
 
 func (con *dir) Get(localDir string) int {
