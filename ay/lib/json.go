@@ -15,10 +15,10 @@ import (
 var _ BeJson = (*beJson)(nil)
 
 type BeJson interface {
-	Msg(code int, msg string, data interface{})
-	Success(data interface{})
-	Fail(msg string)
-	Code(code int)
+	Msg(code int, msg string, data interface{}) // 自定义返回
+	Success(data interface{})                   // 返回 200 data信息
+	Fail(msg string)                            // 返回400 无data信息
+	Code(code int)                              // 返回200 无data信息
 }
 
 type beJson struct {
