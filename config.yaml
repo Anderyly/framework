@@ -10,4 +10,11 @@ sql:
   password: root
   database: demo
 
+redis:
+  addr: "127.0.0.1:6379"
+  password:
+  db: 1
+  pool_size: 10
+  idle_timeout: 1m
+
 port: 9090
