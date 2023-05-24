@@ -2,11 +2,12 @@
 
 key: #@!^5ebcQJx2Lz6mysqlNiNHW^!@#
 
-mysql:
-  localhost: 110.40.212.154
+sql:
+  type: mysql
+  localhost: 127.0.0.1
   port: 3306
-  user: dragonfly
-  password: dragonfly
-  database: dragonfly
+  user: root
+  password: root
+  database: demo
 
 port: 9090

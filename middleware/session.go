@@ -9,7 +9,7 @@ import (
 func SetSession(r *gin.Engine) *gin.Engine {
 
 	store := cookie.NewStore([]byte("Andreyly"))
-	r.Use(sessions.Sessions("sb", store))
+	r.Use(sessions.Sessions("session", store))
 
 	return r
 
