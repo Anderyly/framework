@@ -9,6 +9,7 @@ import (
 var Db *gorm.DB
 
 func GetDB() (err error) {
+	InitializeRedis()
 	var option gorm.Dialector
 
 	switch Yaml.GetString("sql.type") {

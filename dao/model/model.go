@@ -1,13 +1,13 @@
 package model
 
 import (
-	"auth/ay"
 	"context"
 	"crypto/rand"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"framework/ay"
 	"math/big"
 	"strings"
 	"time"
