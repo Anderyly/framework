@@ -3,7 +3,7 @@ package serve
 import (
 	"framework/app/services"
 	"framework/ay"
-	"framework/middleware"
+	"framework/ay/middleware"
 	"framework/routers"
 	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"

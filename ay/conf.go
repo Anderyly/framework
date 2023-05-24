@@ -18,7 +18,7 @@ var Yaml *viper.Viper
 func InitConfig() *viper.Viper {
 	config := viper.New()
 	config.SetConfigName("config")
-	config.AddConfigPath("conf/")
+	config.AddConfigPath(".")
 	config.SetConfigType("yaml")
 	err := config.ReadInConfig()
 	if err != nil {
