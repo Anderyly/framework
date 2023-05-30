@@ -31,11 +31,9 @@ func WatchConf() {
 	Yaml.WatchConfig()
 	Yaml.OnConfigChange(func(event fsnotify.Event) {
 		// 配置文件修改重新执行的方法
-		err := GetDB()
-		if err != nil {
+		if err := GetDB(); err != nil {
 			log.Println(err)
 		}
-		//
 		log.Printf("Detect config change: %s \n", event.String())
 	})
 }

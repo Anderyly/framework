@@ -6,7 +6,6 @@ package query
 
 import (
 	"context"
-	"framework/dao/model"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -16,6 +15,8 @@ import (
 	"gorm.io/gen/field"
 
 	"gorm.io/plugin/dbresolver"
+
+	"framework/dao/model"
 )
 
 func newDemo(db *gorm.DB, opts ...gen.DOOption) demo {

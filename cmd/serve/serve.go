@@ -42,6 +42,7 @@ func Cmd() *cobra.Command {
 			// 加载gin
 			gin.SetMode(gin.DebugMode)
 			r = gin.Default()
+
 			middleware.Instance(r)
 			r.StaticFS("/static/", http.Dir("./static"))
 			r.StaticFS("/root", http.Dir("./admin"))
