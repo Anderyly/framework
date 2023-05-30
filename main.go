@@ -1,7 +1,7 @@
 package main
 
 import (
-	"framework/cmd/serve"
+	main2 "framework/cmd/serve"
 	"github.com/spf13/cobra"
 )
 
@@ -13,7 +13,7 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	rootCmd.AddCommand(serve.Cmd())
+	rootCmd.AddCommand(main2.Cmd())
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}
