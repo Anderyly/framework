@@ -7,7 +7,7 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use: "im-server",
+	Use: "framework",
 	Run: func(cmd *cobra.Command, args []string) {
 		_ = cmd.Help()
 	},
