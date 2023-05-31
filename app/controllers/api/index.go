@@ -1,17 +1,18 @@
 package api
 
 import (
+	"framework/ay/lib"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type IndexController struct {
 }
 
 func (con IndexController) Index(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"code": 200,
-		"msg":  "success",
-		"data": gin.H{},
-	})
+	lib.NewJson(c).Code(200, "")
+	//	c.JSON(http.StatusOK, gin.H{
+	//	"code": 200,
+	//	"msg":  "success",
+	//	"data": gin.H{},
+	//})
 }

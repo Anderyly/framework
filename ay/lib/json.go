@@ -18,14 +18,14 @@ type BeJson interface {
 	Msg(code int, msg string, data interface{}) // 自定义返回
 	Success(data interface{})                   // 返回 200 data信息
 	Fail(msg string)                            // 返回400 无data信息
-	Code(code int)                              // 返回200 无data信息
+	Code(code int, msg string)                  // 返回自定义状态、消息 无data信息
 }
 
 type beJson struct {
 	Ctx *gin.Context
 }
 
-type restbeJson struct {
+type respJson struct {
 	Code int         `json:"code"`
 	Msg  string      `json:"msg"`
 	Data interface{} `json:"data"`
@@ -35,8 +35,8 @@ func NewJson(c *gin.Context) BeJson {
 	return &beJson{Ctx: c}
 }
 
-func (con *beJson) Code(code int) {
-	con.Msg(code, "success", map[string]interface{}{})
+func (con *beJson) Code(code int, msg string) {
+	con.Msg(code, msg, map[string]interface{}{})
 }
 
 func (con *beJson) Success(data interface{}) {
@@ -48,7 +48,7 @@ func (con *beJson) Fail(msg string) {
 }
 
 func (con *beJson) Msg(code int, msg string, data interface{}) {
-	con.Ctx.JSON(http.StatusOK, restbeJson{
+	con.Ctx.JSON(http.StatusOK, respJson{
 		Code: code,
 		Msg:  msg,
 		Data: data,
