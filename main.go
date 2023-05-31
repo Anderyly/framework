@@ -1,8 +1,8 @@
 package main
 
 import (
-	"framework/cmd/generate"
 	"framework/cmd/serve"
+	"framework/cmd/sql"
 	"github.com/spf13/cobra"
 )
 
@@ -14,8 +14,9 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
+	rootCmd.AddCommand(sql.Cmd())
 	rootCmd.AddCommand(serve.Cmd())
-	rootCmd.AddCommand(generate.Cmd())
+
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}

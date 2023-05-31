@@ -47,6 +47,7 @@ func Cmd() *cobra.Command {
 			r.StaticFS("/static/", http.Dir("./static"))
 			r.StaticFS("/root", http.Dir("./admin"))
 			routers.Instance(r)
+
 			err = r.Run(":" + ay.Yaml.GetString("port"))
 
 			if err != nil {

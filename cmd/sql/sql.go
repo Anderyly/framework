@@ -1,4 +1,4 @@
-package generate
+package sql
 
 import (
 	"framework/ay"
@@ -10,8 +10,8 @@ import (
 
 func Cmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "generate",
-		Short: "开启服务",
+		Use:   "sql",
+		Short: "生成sql",
 
 		Run: func(cmd *cobra.Command, args []string) {
 			runGen()
