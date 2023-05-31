@@ -40,7 +40,15 @@ func (con *beJson) Code(code int, msg string) {
 }
 
 func (con *beJson) Success(data interface{}) {
-	con.Msg(http.StatusOK, "success", data)
+	if _, ok := data.(string); ok {
+		if data.(string) == "" {
+			con.Msg(http.StatusOK, "success", map[string]interface{}{})
+		} else {
+			con.Msg(http.StatusOK, data.(string), map[string]interface{}{})
+		}
+	} else {
+		con.Msg(http.StatusOK, "success", data)
+	}
 }
 
 func (con *beJson) Fail(msg string) {
