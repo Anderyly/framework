@@ -4,7 +4,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/mysql"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 func InitDB() {
@@ -22,12 +24,14 @@ func GetDB() (err error) {
 		dsn := Yaml.GetString("sql.user") + ":" + Yaml.GetString("sql.password") + "@tcp(" + Yaml.GetString("sql.localhost") + ":" + Yaml.GetString("sql.port") + ")/" + Yaml.GetString("sql.database") + "?charset=utf8mb4&parseTime=true&loc=Local"
 		option = mysql.New(mysql.Config{DSN: dsn})
 	case "sqlite":
-		//option = sqlite.Open(Yaml.GetString("sql.localhost"))
+		option = sqlite.Open(Yaml.GetString("sql.localhost"))
 	default:
 
 	}
 
-	if Db, err = gorm.Open(option, &gorm.Config{}); err != nil {
+	if Db, err = gorm.Open(option, &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{SingularTable: true},
+	}); err != nil {
 		return
 	}
 
