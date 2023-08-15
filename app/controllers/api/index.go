@@ -14,8 +14,13 @@ type IndexController struct {
 func (con IndexController) Index(c *gin.Context) {
 	b := biz.NewBiz(c)
 	res, err := ay.IgnoreNotFoundReturn(b.Demo.Get(1))
-	if err != nil || res == nil {
+	if err != nil {
 		lib.NewJson(c).Fail(err.Error())
+		return
+	}
+	if res == nil {
+		lib.NewJson(c).Fail("数据不存在")
+		return
 	}
 
 	lib.NewJson(c).Msg(http.StatusOK, "success", res)
