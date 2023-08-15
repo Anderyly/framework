@@ -13,9 +13,11 @@ import (
 	"log"
 )
 
-var Yaml *viper.Viper
+func InitConfig() {
+	Yaml = getConfig()
+}
 
-func InitConfig() *viper.Viper {
+func getConfig() *viper.Viper {
 	config := viper.New()
 	config.SetConfigName("config")
 	config.AddConfigPath(".")
@@ -31,9 +33,7 @@ func WatchConf() {
 	Yaml.WatchConfig()
 	Yaml.OnConfigChange(func(event fsnotify.Event) {
 		// 配置文件修改重新执行的方法
-		if err := GetDB(); err != nil {
-			log.Println(err)
-		}
-		log.Printf("Detect config change: %s \n", event.String())
+		Init()
+		Logger.Info("Detect config change: " + event.String())
 	})
 }

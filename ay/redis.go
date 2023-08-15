@@ -6,7 +6,6 @@ import (
 )
 
 var (
-	Redis    *redis.Client
 	RedisNil = redis.Nil
 )
 
@@ -19,6 +18,6 @@ func InitializeRedis() {
 	})
 	err := Redis.Ping(context.Background()).Err()
 	if err != nil {
-		panic(err)
+		Logger.Error(err.Error())
 	}
 }

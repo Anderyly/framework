@@ -1,4 +1,4 @@
-# conf/config.yaml
+# config.yaml
 
 key: #@!^5ebcQJx2Lz6mysqlNiNHW^!@#
 
@@ -17,4 +17,3 @@ redis:
   pool_size: 10
   idle_timeout: 1m
 
-port: 9090

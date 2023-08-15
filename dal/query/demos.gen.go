@@ -16,7 +16,7 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"framework/dao/model"
+	"framework/dal/model"
 )
 
 func newDemo(db *gorm.DB, opts ...gen.DOOption) demo {
@@ -27,13 +27,11 @@ func newDemo(db *gorm.DB, opts ...gen.DOOption) demo {
 
 	tableName := _demo.demoDo.TableName()
 	_demo.ALL = field.NewAsterisk(tableName)
-	_demo.ID = field.NewUint(tableName, "id")
-	_demo.CreatedAt = field.NewTime(tableName, "created_at")
-	_demo.UpdatedAt = field.NewTime(tableName, "updated_at")
-	_demo.DeletedAt = field.NewField(tableName, "deleted_at")
+	_demo.Id = field.NewInt64(tableName, "id")
+	_demo.CreatedAt = field.NewInt64(tableName, "created_at")
+	_demo.UpdatedAt = field.NewInt64(tableName, "updated_at")
+	_demo.DeletedAt = field.NewInt64(tableName, "deleted_at")
 	_demo.Content = field.NewString(tableName, "content")
-	_demo.CreateTime = field.NewInt64(tableName, "create_time")
-	_demo.UpdateTime = field.NewInt64(tableName, "update_time")
 
 	_demo.fillFieldMap()
 
@@ -43,14 +41,12 @@ func newDemo(db *gorm.DB, opts ...gen.DOOption) demo {
 type demo struct {
 	demoDo demoDo
 
-	ALL        field.Asterisk
-	ID         field.Uint
-	CreatedAt  field.Time
-	UpdatedAt  field.Time
-	DeletedAt  field.Field
-	Content    field.String
-	CreateTime field.Int64
-	UpdateTime field.Int64
+	ALL       field.Asterisk
+	Id        field.Int64
+	CreatedAt field.Int64
+	UpdatedAt field.Int64
+	DeletedAt field.Int64
+	Content   field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -67,13 +63,11 @@ func (d demo) As(alias string) *demo {
 
 func (d *demo) updateTableName(table string) *demo {
 	d.ALL = field.NewAsterisk(table)
-	d.ID = field.NewUint(table, "id")
-	d.CreatedAt = field.NewTime(table, "created_at")
-	d.UpdatedAt = field.NewTime(table, "updated_at")
-	d.DeletedAt = field.NewField(table, "deleted_at")
+	d.Id = field.NewInt64(table, "id")
+	d.CreatedAt = field.NewInt64(table, "created_at")
+	d.UpdatedAt = field.NewInt64(table, "updated_at")
+	d.DeletedAt = field.NewInt64(table, "deleted_at")
 	d.Content = field.NewString(table, "content")
-	d.CreateTime = field.NewInt64(table, "create_time")
-	d.UpdateTime = field.NewInt64(table, "update_time")
 
 	d.fillFieldMap()
 
@@ -96,14 +90,12 @@ func (d *demo) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (d *demo) fillFieldMap() {
-	d.fieldMap = make(map[string]field.Expr, 7)
-	d.fieldMap["id"] = d.ID
+	d.fieldMap = make(map[string]field.Expr, 5)
+	d.fieldMap["id"] = d.Id
 	d.fieldMap["created_at"] = d.CreatedAt
 	d.fieldMap["updated_at"] = d.UpdatedAt
 	d.fieldMap["deleted_at"] = d.DeletedAt
 	d.fieldMap["content"] = d.Content
-	d.fieldMap["create_time"] = d.CreateTime
-	d.fieldMap["update_time"] = d.UpdateTime
 }
 
 func (d demo) clone(db *gorm.DB) demo {

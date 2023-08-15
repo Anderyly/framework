@@ -2,10 +2,9 @@ package sql
 
 import (
 	"framework/ay"
-	"framework/dao/model"
+	"framework/dal/model"
 	"github.com/spf13/cobra"
 	"gorm.io/gen"
-	"log"
 )
 
 func Cmd() *cobra.Command {
@@ -23,15 +22,10 @@ func Cmd() *cobra.Command {
 func runGen() {
 
 	// 配置文件
-	ay.Yaml = ay.InitConfig()
-	err := ay.GetDB()
-	if err != nil {
-		log.Println(err)
-	}
-	go ay.WatchConf()
+	ay.Init()
 
 	g := gen.NewGenerator(gen.Config{
-		OutPath: "./dao/query",
+		OutPath: "./dal/query",
 	})
 	list := []interface{}{
 		model.Demo{},
@@ -39,7 +33,7 @@ func runGen() {
 
 	ay.Db.DisableForeignKeyConstraintWhenMigrating = true
 	if err := ay.Db.AutoMigrate(list...); err != nil {
-		panic(err)
+		ay.Logger.Error(err.Error())
 	}
 	g.ApplyBasic(list...) // 绑定表
 	g.Execute()
