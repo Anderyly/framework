@@ -11,9 +11,9 @@ import (
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"framework/ay"
-	"io"
 	"math/rand"
 	"regexp"
 	"strconv"
@@ -26,8 +26,8 @@ var _ Str = (*str)(nil)
 type Str interface {
 	LastTime(t int64) string
 	Md5(str string) string
-	AuthCode(str, operation, key string, expiry int64) string
-	MakeCoupon(coupon string) float64
+	AuthCode(str string, operation bool, key string, expiry int64) (string, error) // false is decode
+	MakeCoupon(coupon string) (float64, error)                                     //
 	Summary(content string, count int) string
 }
 
@@ -39,15 +39,16 @@ func NewStr() Str {
 }
 
 func (con *str) LastTime(t int64) (msg string) {
-	s := int(time.Now().Unix()-t) / 60
+	minute := int(time.Minute)
+	s := int(time.Now().Unix()-t) / minute
 
 	switch {
-	case s < 60:
+	case s < minute:
 		msg = strconv.Itoa(s) + "分钟前"
-	case s >= 60 && s < (60*24):
-		msg = strconv.Itoa(s/60) + "小时前"
-	case s >= (60*24) && s < (60*24*3):
-		msg = strconv.Itoa(s/24/60) + "天前"
+	case s >= minute && s < (minute*24):
+		msg = strconv.Itoa(s/minute) + "小时前"
+	case s >= (minute*24) && s < (minute*24*3):
+		msg = strconv.Itoa(s/24/minute) + "天前"
 	default:
 		msg = time.Unix(t, 0).Format("2006-01-02 15:04:05")
 	}
@@ -55,19 +56,21 @@ func (con *str) LastTime(t int64) (msg string) {
 }
 
 func (con *str) Md5(str string) string {
-	Md5 := md5.New()
-	_, _ = io.WriteString(Md5, str)
-	return hex.EncodeToString(Md5.Sum(nil))
+	h := md5.New()
+	h.Write([]byte(str))
+	return hex.EncodeToString(h.Sum(nil))
 }
 
-func (con *str) AuthCode(str, operation, key string, expiry int64) string {
+func (con *str) AuthCode(str string, operation bool, key string, expiry int64) (result string, err error) {
 	cKeyLength := 1
 	if len(str) < cKeyLength {
-		return ""
+		err = errors.New("str length less than key length")
+		return
 	}
 
-	if len(str) < 11 && operation == "DECODE" {
-		return ""
+	if len(str) < 11 && !operation {
+		err = errors.New("decode length less than 11")
+		return
 	}
 	if key == "" {
 		key = ay.Yaml.GetString("key")
@@ -77,7 +80,7 @@ func (con *str) AuthCode(str, operation, key string, expiry int64) string {
 	keyA := con.Md5(key[:16])
 	keyB := con.Md5(key[16:])
 	keyC := ""
-	if operation == "DECODE" {
+	if !operation {
 		keyC = str[:cKeyLength]
 	} else {
 		sTime := con.Md5(time.Now().String())
@@ -86,12 +89,14 @@ func (con *str) AuthCode(str, operation, key string, expiry int64) string {
 	}
 	cryptKey := fmt.Sprintf("%s%s", keyA, con.Md5(keyA+keyC))
 	keyLength := len(cryptKey)
-	if operation == "DECODE" {
+	if !operation {
 		str = strings.Replace(str, "-", "+", -1)
 		str = strings.Replace(str, "_", "/", -1)
-		strByte, err := base64.StdEncoding.DecodeString(str[cKeyLength:])
+		str = strings.Replace(str, "=", ".", -1)
+		var strByte []byte
+		strByte, err = base64.StdEncoding.DecodeString(str[cKeyLength:])
 		if err != nil {
-			return ""
+			return
 		}
 		str = string(strByte)
 	} else {
@@ -120,7 +125,6 @@ func (con *str) AuthCode(str, operation, key string, expiry int64) string {
 	}
 	a = 0
 	j = 0
-	tmp = 0
 	for i = 0; i < stringLength; i++ {
 		a = (a + 1) % 256
 		j = (j + box[a]) % 256
@@ -129,48 +133,54 @@ func (con *str) AuthCode(str, operation, key string, expiry int64) string {
 		box[j] = tmp
 		resData = append(resData, byte(int(str[i])^box[(box[a]+box[j])%256]))
 	}
-	result := string(resData)
-	if operation == "DECODE" {
-		frontTen, _err := strconv.ParseInt(result[:10], 10, 0)
-		if _err != nil {
-			return ""
+	result = string(resData)
+	if !operation {
+		var frontTen int64
+		frontTen, err = strconv.ParseInt(result[:10], 10, 0)
+		if err != nil {
+			return
 		}
 		if (frontTen == 0 || frontTen-time.Now().Unix() > 0) && result[10:26] == con.Md5(result[26:] + keyB)[:16] {
-			return result[26:]
+			result = result[26:]
+			return
 		} else {
-			return ""
+			err = errors.New("decode error")
+			return
 		}
 	} else {
 		result = keyC + base64.StdEncoding.EncodeToString([]byte(result))
 		result = strings.Replace(result, "+", "-", -1)
 		result = strings.Replace(result, "/", "_", -1)
-		return result
+		result = strings.Replace(result, ".", "=", -1)
+		return
 	}
 }
 
 // MakeCoupon 优惠价
-func (con *str) MakeCoupon(coupon string) float64 {
-
+func (con *str) MakeCoupon(coupon string) (amount float64, err error) {
+	var maxPrice float64
+	var minPrice float64
 	couponArr := strings.Split(coupon, "-")
 
-	maxPrice, err := strconv.ParseFloat(couponArr[1], 64)
-	if err != nil {
-		return 0
+	if maxPrice, err = strconv.ParseFloat(couponArr[1], 64); err != nil {
+		return
 	}
-	minPrice, err1 := strconv.ParseFloat(couponArr[0], 64)
-	if err1 != nil {
-		return 0
+	if minPrice, err = strconv.ParseFloat(couponArr[0], 64); err != nil {
+		return
 	}
 	cha := maxPrice - minPrice
 	var price float64
 	for {
 		p := 0.01 + rand.Float64()*(cha-0.01)
-		price, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", p), 64)
+		if price, err = strconv.ParseFloat(fmt.Sprintf("%.2f", p), 64); err != nil {
+			return
+		}
 		if price <= cha {
 			break
 		}
 	}
-	return price + minPrice
+	amount = price + minPrice
+	return
 }
 
 // Summary 过滤特殊字符

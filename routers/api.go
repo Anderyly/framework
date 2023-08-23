@@ -8,7 +8,7 @@ import (
 func ApiRouter(r *gin.Engine) *gin.Engine {
 
 	router := r.Group("/api")
-	router.GET("", api.IndexController{}.Index)
+	router.Any("", api.IndexController{}.Index)
 
 	return r
 }
